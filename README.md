@@ -5,17 +5,8 @@ Python 3.10 기반의 프로세스 스케줄링 시뮬레이터입니다. FCFS, 
 ## 실행
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
-
-Windows에서는 다음 명령을 사용할 수 있습니다.
-
-```bat
-python -m venv .venv
-.venv\Scripts\activate
+conda create -n os_assign python==3.10 -y
+conda activate os_assign
 pip install -r requirements.txt
 python main.py
 ```
