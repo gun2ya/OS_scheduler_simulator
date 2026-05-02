@@ -47,3 +47,4 @@ python -m pytest
 - 신규 배정은 E 코어를 P 코어보다 우선합니다.
 - idle에서 active로 전환될 때만 startup power를 부과합니다.
 - P 코어는 tick당 2 work units를 처리하지만, 남은 일이 1이어도 1 tick의 active power를 소비합니다.# OS_scheduler_simulator
+# OS_scheduler_simulator
