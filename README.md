@@ -1,6 +1,6 @@
 # Process Scheduling Simulator
 
-Python 3.11 기반의 프로세스 스케줄링 시뮬레이터입니다. FCFS, RR, SPN, SRTN, HRRN, Custom placeholder를 지원하고, P/E 코어 처리량 차이와 전력 소비를 함께 계산합니다.
+Python 3.10 기반의 프로세스 스케줄링 시뮬레이터입니다. FCFS, RR, SPN, SRTN, HRRN, Custom placeholder를 지원하고, P/E 코어 처리량 차이와 전력 소비를 함께 계산합니다.
 
 ## 실행
 
@@ -46,15 +46,4 @@ python -m pytest
 - 기존 실행 작업은 같은 코어에서 계속 실행하는 것을 우선합니다.
 - 신규 배정은 E 코어를 P 코어보다 우선합니다.
 - idle에서 active로 전환될 때만 startup power를 부과합니다.
-- P 코어는 tick당 2 work units를 처리하지만, 남은 일이 1이어도 1 tick의 active power를 소비합니다.
-
-## 패키징
-
-Windows 제출용 실행 파일은 다음과 같은 방식으로 만들 수 있습니다.
-
-```bash
-pyinstaller --onedir --windowed --collect-all PyQt6 --name scheduler_sim main.py
-```
-
-제출 전에는 최소 2대 이상의 Windows PC에서 `dist/scheduler_sim/scheduler_sim.exe` 또는 별도 `run.bat` 실행을 확인하는 것을 권장합니다.
-# OS_scheduler_simulator
+- P 코어는 tick당 2 work units를 처리하지만, 남은 일이 1이어도 1 tick의 active power를 소비합니다.# OS_scheduler_simulator
