@@ -12,6 +12,8 @@ class Process:
     start_time: int = -1
     completion_time: int = -1
     waiting_time: int = 0
+    last_core_id: int | None = None
+    migration_count: int = 0
 
     def __post_init__(self) -> None:
         if self.pid < 0:
@@ -50,4 +52,5 @@ class Process:
         self.start_time = -1
         self.completion_time = -1
         self.waiting_time = 0
-
+        self.last_core_id = None
+        self.migration_count = 0

@@ -16,6 +16,7 @@ class Core:
     power_startup: float
     current_pid: int | None = None
     was_idle: bool = True
+    run_ticks: int = 0
 
     def __post_init__(self) -> None:
         if self.core_id < 0:
@@ -38,4 +39,4 @@ class Core:
     def reset_runtime(self) -> None:
         self.current_pid = None
         self.was_idle = True
-
+        self.run_ticks = 0

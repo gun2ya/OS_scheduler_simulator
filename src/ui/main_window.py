@@ -58,6 +58,7 @@ class MainWindow(QMainWindow):
         }
 
         self.algorithm_combo = QComboBox()
+        self.algorithm_combo.setMinimumWidth(150)
         self.algorithm_combo.addItems(self.scheduler_factories.keys())
         self.algorithm_combo.currentTextChanged.connect(self._sync_quantum_state)
         self.quantum_spin = QSpinBox()
@@ -114,9 +115,14 @@ class MainWindow(QMainWindow):
         right_layout = QVBoxLayout(right)
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(12)
-        right_layout.addWidget(self._make_section_panel("Core Telemetry", self.core_status))
-        right_layout.addWidget(self._make_section_panel("Execution Timeline", self.gantt), stretch=2)
-        right_layout.addWidget(self._make_section_panel("Process Metrics", self.results), stretch=2)
+        telemetry_panel = self._make_section_panel("Core Telemetry", self.core_status)
+        telemetry_panel.setMaximumHeight(196)
+        telemetry_panel.setMinimumHeight(156)
+        timeline_panel = self._make_section_panel("Execution Timeline", self.gantt)
+        metrics_panel = self._make_section_panel("Process Metrics", self.results)
+        right_layout.addWidget(telemetry_panel)
+        right_layout.addWidget(timeline_panel, stretch=2)
+        right_layout.addWidget(metrics_panel, stretch=3)
 
         splitter = QSplitter()
         splitter.addWidget(self.input_panel)

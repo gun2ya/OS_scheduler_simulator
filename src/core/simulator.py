@@ -46,6 +46,22 @@ class SimulationResult:
             / len(self.processes)
         )
 
+    @property
+    def average_migrations_per_process(self) -> float:
+        if not self.processes:
+            return 0.0
+        return sum(process.migration_count for process in self.processes) / len(self.processes)
+
+    @property
+    def p_core_utilization_rate(self) -> float:
+        p_core_ids = {core.core_id for core in self.cores if core.core_type == "P"}
+        if not p_core_ids or self.finish_time <= 0:
+            return 0.0
+        active_ticks = sum(
+            1 for event in self.events if event.core_id in p_core_ids and event.pid is not None
+        )
+        return active_ticks / (len(p_core_ids) * self.finish_time)
+
 
 class Simulator:
     def __init__(
@@ -93,10 +109,12 @@ class Simulator:
                 if assigned_pid is None:
                     events.append(ScheduleEvent(current_time, 1, core.core_id, None))
                     core.current_pid = None
+                    core.run_ticks = 0
                     core.was_idle = True
                     continue
 
                 process = self._process_by_pid[assigned_pid]
+                previous_pid = core.current_pid
                 if core.was_idle:
                     power_log.append(
                         PowerEvent(current_time, core.core_id, "startup", core.power_startup)
@@ -110,14 +128,19 @@ class Simulator:
 
                 events.append(ScheduleEvent(current_time, 1, core.core_id, process.pid))
                 power_log.append(PowerEvent(current_time, core.core_id, "active", core.power_active))
+                if process.last_core_id is not None and process.last_core_id != core.core_id:
+                    process.migration_count += 1
+                process.last_core_id = core.core_id
 
                 core.was_idle = False
                 if process.remaining == 0:
                     process.completion_time = current_time + 1
                     completed_this_tick.add(process.pid)
                     core.current_pid = None
+                    core.run_ticks = 0
                 else:
                     core.current_pid = process.pid
+                    core.run_ticks = core.run_ticks + 1 if previous_pid == process.pid else 1
 
             if completed_this_tick:
                 ready_queue[:] = [
@@ -176,4 +199,3 @@ class Simulator:
             if pid not in ready_pids:
                 raise ValueError(f"scheduler assigned unavailable pid={pid}")
             seen_pids.add(pid)
-

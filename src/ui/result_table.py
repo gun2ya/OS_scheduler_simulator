@@ -60,7 +60,9 @@ class ResultTable(QWidget):
             f"Total Power: {result.total_power:.1f} W*s | "
             f"Avg WT: {result.average_waiting_time:.2f} | "
             f"Avg TT: {result.average_turnaround_time:.2f} | "
-            f"Avg NTT: {result.average_normalized_turnaround_time:.2f}"
+            f"Avg NTT: {result.average_normalized_turnaround_time:.2f} | "
+            f"Avg Mig: {result.average_migrations_per_process:.2f} | "
+            f"P Util: {result.p_core_utilization_rate:.0%}"
         )
 
     def _make_item(self, value: int | str, column: int) -> QTableWidgetItem:

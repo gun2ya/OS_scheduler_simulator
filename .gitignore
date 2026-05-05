@@ -1,8 +1,10 @@
 __pycache__/
 .pytest_cache/
 .venv/
+.venv-build/
+.pyinstaller-build/
 dist/
 build/
+release/
 *.spec
 .DS_Store
-

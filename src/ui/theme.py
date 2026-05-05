@@ -179,13 +179,21 @@ QFrame#coreCard[coreType="E"] {
 
 QLabel#coreTitle {
     color: #eee7d7;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
 }
 
 QLabel#metricLabel {
     color: #c5bdae;
-    font-size: 13px;
+    font-size: 12px;
+}
+
+QTableWidget#telemetryTable {
+    border-radius: 8px;
+}
+
+QTableWidget#telemetryTable::item {
+    padding: 5px 6px;
 }
 
 QTableWidget {

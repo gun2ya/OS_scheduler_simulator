@@ -26,7 +26,7 @@ from src.ui.theme import (
 class GanttWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
-        self.figure = Figure(figsize=(7, 3), tight_layout=True, facecolor=CHART_BACKGROUND)
+        self.figure = Figure(figsize=(7, 3), facecolor=CHART_BACKGROUND)
         self.canvas = FigureCanvas(self.figure)
 
         layout = QVBoxLayout(self)
@@ -37,22 +37,24 @@ class GanttWidget(QWidget):
     def update_result(self, result: SimulationResult | None) -> None:
         self.figure.clear()
         axis = self.figure.add_subplot(111)
-        axis.set_facecolor(CHART_PANEL)
-        axis.set_title("Gantt Chart", loc="left", fontweight="bold", color=CHART_TEXT)
-        axis.set_xlabel("Time")
-        axis.set_ylabel("Core")
-        axis.xaxis.label.set_color(CHART_TEXT)
-        axis.yaxis.label.set_color(CHART_TEXT)
 
         if result is None or not result.events:
+            axis.set_facecolor(CHART_PANEL)
             axis.text(0.5, 0.5, "No simulation result", ha="center", va="center", color=CHART_TEXT)
             axis.set_axis_off()
             self.canvas.draw_idle()
             return
 
+        axis.set_facecolor(CHART_PANEL)
+        axis.set_title("Gantt Chart", loc="left", fontweight="bold", color=CHART_TEXT)
+        axis.set_xlabel("Time")
+        axis.set_ylabel("")
+        axis.xaxis.label.set_color(CHART_TEXT)
+
         grouped = self._merge_events(result.events)
         core_ids = [core.core_id for core in result.cores]
         core_to_y = {core_id: index for index, core_id in enumerate(core_ids)}
+        core_labels = {core.core_id: f"{core.core_type}{core.core_id}" for core in result.cores}
 
         for event in grouped:
             y = core_to_y[event.core_id]
@@ -90,11 +92,13 @@ class GanttWidget(QWidget):
         axis.set_xlim(0, max(event.time + event.duration for event in grouped))
         axis.set_ylim(-0.75, len(core_ids) - 0.25)
         axis.set_yticks(list(core_to_y.values()))
-        axis.set_yticklabels([f"Core {core_id}" for core_id in core_ids])
-        axis.tick_params(colors="#c8c0b2")
+        axis.set_yticklabels([core_labels[core_id] for core_id in core_ids])
+        axis.tick_params(axis="x", colors="#c8c0b2", pad=5)
+        axis.tick_params(axis="y", colors="#c8c0b2", pad=8, labelsize=10)
         axis.grid(axis="x", linestyle=":", color=CHART_GRID)
         for spine in axis.spines.values():
             spine.set_color("#303746")
+        self.figure.subplots_adjust(left=0.085, right=0.985, top=0.84, bottom=0.18)
         self.canvas.draw_idle()
 
     def _label_color_for(self, color: str) -> str:

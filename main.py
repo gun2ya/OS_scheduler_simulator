@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 
-
 def main() -> int:
     try:
         from PyQt6.QtWidgets import QApplication

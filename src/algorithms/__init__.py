@@ -2,6 +2,7 @@
 
 from .base import Scheduler
 from .custom import CustomScheduler
+from .eapb import EAPBScheduler
 from .fcfs import FCFSScheduler
 from .hrrn import HRRNScheduler
 from .rr import RRScheduler
@@ -19,6 +20,7 @@ SCHEDULERS = {
 
 __all__ = [
     "CustomScheduler",
+    "EAPBScheduler",
     "FCFSScheduler",
     "HRRNScheduler",
     "RRScheduler",
@@ -27,4 +29,3 @@ __all__ = [
     "SRTNScheduler",
     "Scheduler",
 ]
-
