@@ -17,6 +17,10 @@ Scheduler Simulator는 P 코어와 E 코어가 함께 존재하는 이기종 멀
 
 FCFS, RR, SPN, SRTN, HRRN, Custom(EAPB)을 같은 입력 조건에서 실행하고, 실행 타임라인, 프로세스 메트릭, 코어 텔레메트리, 전력 소비를 한 화면에서 확인할 수 있습니다.
 
+<p align="center">
+  <img src="assets/workshot.png" alt="Scheduler Simulator workshot" width="100%">
+</p>
+
 ## Highlights
 
 - 6가지 스케줄링 알고리즘 지원: FCFS, RR, SPN, SRTN, HRRN, Custom(EAPB)
