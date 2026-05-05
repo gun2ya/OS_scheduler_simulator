@@ -93,6 +93,14 @@ QSpinBox {
     padding-right: 38px;
 }
 
+QSpinBox#quantumSpin {
+    min-width: 92px;
+    min-height: 38px;
+    padding: 2px 40px 2px 10px;
+    font-size: 15px;
+    font-weight: 900;
+}
+
 QSpinBox::up-button {
     subcontrol-origin: border;
     subcontrol-position: top right;
@@ -121,6 +129,11 @@ QSpinBox::down-button:hover {
 
 QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
     background-color: #9c8d6f;
+}
+
+QSpinBox#quantumSpin::up-button,
+QSpinBox#quantumSpin::down-button {
+    width: 34px;
 }
 
 QComboBox:focus, QSpinBox:focus {
