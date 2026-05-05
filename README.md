@@ -90,8 +90,8 @@ build_windows.bat
 
 ## How To Use
 
-1. 좌측 패널에서 P 코어, E 코어 개수를 설정합니다.
-2. 프로세스 목록에서 PID, arrival time, burst time을 입력합니다.
+1. 좌측 패널에서 P 코어, E 코어 개수를 설정합니다. 기존 4P/8E 고정 제한 없이 더 많은 코어도 입력할 수 있습니다.
+2. 프로세스 목록에서 PID, arrival time, burst time을 입력합니다. 15개까지는 한 화면에 보이고, 그 이상은 테이블 스크롤로 계속 입력할 수 있습니다.
 3. 필요하면 `Random AT/BT` 버튼으로 합리적인 범위의 입력값을 자동 생성합니다.
 4. 상단 toolbar에서 알고리즘을 선택합니다.
 5. RR을 선택한 경우 `Time-quantum = δ` 값을 설정합니다.
@@ -102,7 +102,7 @@ build_windows.bat
 | 패널 | 내용 |
 |---|---|
 | Core Telemetry | 코어별 active time, startup count, energy |
-| Execution Timeline | 코어별 Gantt chart |
+| Execution Timeline | 코어별 Gantt chart. 코어 수가 많으면 세로 스크롤로 확인 |
 | Process Metrics | 프로세스별 `AT`, `BT`, `WT`, `TT`, `NTT` |
 
 ## Algorithms
@@ -126,6 +126,26 @@ EAPB는 Energy-Aware P-core Boost의 약자입니다. 짧게 말하면 “정말
 - EDP(Energy Delay Product)를 이용해 P 코어와 E 코어 중 더 합리적인 코어를 고릅니다.
 - 이전에 실행된 코어를 기억해 migration cost를 부여하고 불필요한 이동을 줄입니다.
 - starvation 위험이 커질 때만 제한적으로 preemption을 허용합니다.
+
+EAPB의 코어 선택 비용은 다음처럼 계산합니다.
+
+```text
+cost(process, core) = edp_cost(process, core)
+                    + λ * migration_penalty(process, core)
+```
+
+`migration_penalty(process, core)`는 프로세스가 이전에 실행되던 코어와 다른 코어로 옮겨질 때 부과되는 cache affinity 비용입니다. 같은 코어에서 계속 실행되거나 처음 배정되는 프로세스라면 penalty는 `0`입니다. 다른 코어로 이동해야 한다면 cache warmup 1 tick에 해당하는 비용을 현재 후보 코어의 active power와 예상 turnaround time에 비례해 더합니다.
+
+```text
+if process.last_core_id is None or process.last_core_id == core.core_id:
+    migration_penalty = 0
+else:
+    migration_penalty = CACHE_WARMUP_TICKS
+                      * core.power_active
+                      * predicted_turnaround
+```
+
+현재 구현에서는 `λ = 0.3`, `CACHE_WARMUP_TICKS = 1`을 사용합니다. 코드에서는 이 항이 `migration_cost(process, core, current_time)`로 구현되어 있습니다.
 
 ## Metrics
 

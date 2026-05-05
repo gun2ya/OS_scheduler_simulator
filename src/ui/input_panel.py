@@ -24,9 +24,10 @@ from src.core.processor import Core
 from src.ui.theme import BURST_COLUMN_BACKGROUND, BURST_COLUMN_FOREGROUND
 
 
-MAX_PROCESS_ROWS = 15
+VISIBLE_PROCESS_ROWS = 15
 PROCESS_ROW_HEIGHT = 28
 PROCESS_TABLE_HEADER_HEIGHT = 34
+CORE_SPIN_MAX = 999
 
 
 class InputPanel(QWidget):
@@ -35,11 +36,11 @@ class InputPanel(QWidget):
         self.setMinimumWidth(360)
 
         self.p_core_spin = QSpinBox()
-        self.p_core_spin.setRange(0, 4)
+        self.p_core_spin.setRange(0, CORE_SPIN_MAX)
         self.p_core_spin.setValue(1)
         self._configure_spin_box(self.p_core_spin)
         self.e_core_spin = QSpinBox()
-        self.e_core_spin.setRange(0, 8)
+        self.e_core_spin.setRange(0, CORE_SPIN_MAX)
         self.e_core_spin.setValue(1)
         self._configure_spin_box(self.e_core_spin)
 
@@ -63,7 +64,7 @@ class InputPanel(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setFixedHeight(PROCESS_TABLE_HEADER_HEIGHT)
         self.table.setMinimumHeight(
-            PROCESS_TABLE_HEADER_HEIGHT + (PROCESS_ROW_HEIGHT * MAX_PROCESS_ROWS) + 8
+            PROCESS_TABLE_HEADER_HEIGHT + (PROCESS_ROW_HEIGHT * VISIBLE_PROCESS_ROWS) + 8
         )
         header = self.table.horizontalHeader()
         header.setMinimumSectionSize(58)
@@ -133,8 +134,6 @@ class InputPanel(QWidget):
     def get_processes(self) -> list[Process]:
         if self.table.rowCount() == 0:
             raise ValueError("at least one process is required")
-        if self.table.rowCount() > MAX_PROCESS_ROWS:
-            raise ValueError(f"process count must be {MAX_PROCESS_ROWS} or less")
 
         processes: list[Process] = []
         seen_pids: set[int] = set()
@@ -154,8 +153,6 @@ class InputPanel(QWidget):
         total = p_count + e_count
         if total < 1:
             raise ValueError("at least one core is required")
-        if total > 12:
-            raise ValueError("total core count must be 12 or less")
 
         cores: list[Core] = []
         core_id = 0
@@ -194,5 +191,7 @@ class InputPanel(QWidget):
         return item
 
     def _configure_spin_box(self, spin_box: QSpinBox) -> None:
+        spin_box.setMinimumWidth(112)
+        spin_box.setMinimumHeight(38)
         spin_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
         spin_box.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.PlusMinus)

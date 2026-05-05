@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.colors import to_rgb
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
-from PyQt6.QtWidgets import QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QScrollArea, QSizePolicy, QVBoxLayout, QWidget
 
 from src.core.event import ScheduleEvent
 from src.core.simulator import SimulationResult
@@ -23,15 +23,34 @@ from src.ui.theme import (
 )
 
 
+MIN_CANVAS_HEIGHT = 220
+CORE_ROW_PIXELS = 32
+CHART_VERTICAL_PADDING = 92
+
+
 class GanttWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.figure = Figure(figsize=(7, 3), facecolor=CHART_BACKGROUND)
         self.canvas = FigureCanvas(self.figure)
+        self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.canvas.setFixedHeight(MIN_CANVAS_HEIGHT)
+
+        self.canvas_container = QWidget()
+        self.canvas_container.setObjectName("ganttCanvasContainer")
+        canvas_layout = QVBoxLayout(self.canvas_container)
+        canvas_layout.setContentsMargins(0, 0, 0, 0)
+        canvas_layout.setSpacing(0)
+        canvas_layout.addWidget(self.canvas)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.canvas_container)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.canvas)
+        layout.addWidget(self.scroll_area)
         self.update_result(None)
 
     def update_result(self, result: SimulationResult | None) -> None:
@@ -39,12 +58,15 @@ class GanttWidget(QWidget):
         axis = self.figure.add_subplot(111)
 
         if result is None or not result.events:
+            self._set_canvas_height(MIN_CANVAS_HEIGHT)
             axis.set_facecolor(CHART_PANEL)
             axis.text(0.5, 0.5, "No simulation result", ha="center", va="center", color=CHART_TEXT)
             axis.set_axis_off()
-            self.canvas.draw_idle()
+            self._reset_scroll_position()
+            self.canvas.draw()
             return
 
+        self._set_canvas_height(self._height_for_core_count(len(result.cores)))
         axis.set_facecolor(CHART_PANEL)
         axis.set_title("Gantt Chart", loc="left", fontweight="bold", color=CHART_TEXT)
         axis.set_xlabel("Time")
@@ -98,8 +120,31 @@ class GanttWidget(QWidget):
         axis.grid(axis="x", linestyle=":", color=CHART_GRID)
         for spine in axis.spines.values():
             spine.set_color("#303746")
-        self.figure.subplots_adjust(left=0.085, right=0.985, top=0.84, bottom=0.18)
-        self.canvas.draw_idle()
+        left_margin = self._left_margin_for_labels(core_labels.values())
+        self.figure.subplots_adjust(left=left_margin, right=0.985, top=0.90, bottom=0.14)
+        self._reset_scroll_position()
+        self.canvas.draw()
+
+    def _set_canvas_height(self, height: int) -> None:
+        width = max(self.scroll_area.viewport().width(), self.width(), self.canvas.width(), 700)
+        dpi = self.figure.dpi
+        self.figure.set_size_inches(width / dpi, height / dpi, forward=True)
+        self.canvas.setMinimumWidth(width)
+        self.canvas.setFixedHeight(height)
+        self.canvas_container.setMinimumHeight(height)
+        self.canvas.updateGeometry()
+        self.canvas_container.updateGeometry()
+
+    def _height_for_core_count(self, core_count: int) -> int:
+        return max(MIN_CANVAS_HEIGHT, CHART_VERTICAL_PADDING + (core_count * CORE_ROW_PIXELS))
+
+    def _left_margin_for_labels(self, labels) -> float:
+        longest = max((len(label) for label in labels), default=2)
+        return min(0.18, max(0.085, 0.045 + (longest * 0.012)))
+
+    def _reset_scroll_position(self) -> None:
+        self.scroll_area.verticalScrollBar().setValue(0)
+        self.scroll_area.horizontalScrollBar().setValue(0)
 
     def _label_color_for(self, color: str) -> str:
         red, green, blue = to_rgb(color)
